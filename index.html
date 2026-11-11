@@ -1,128 +1,151 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MatchsLive - Scores en Direct</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MatchsLive - Scores, Favoris, Recherche</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#0f0f0f;color:#fff;padding-bottom:80px}
-header{background:#16a34a;padding:15px;text-align:center;position:sticky;top:0;z-index:10}
+header{background:#16a34a;padding:15px;text-align:center;position:sticky;top:0;z-index:20}
 header h1{font-size:24px} header p{font-size:12px;opacity:.9}
-.tabs{display:flex;background:#1a1a1a;position:sticky;top:60px;z-index:9}
-.tabs button{flex:1;padding:13px;border:none;background:transparent;color:#aaa;font-weight:bold;cursor:pointer}
+.tabs{display:flex;background:#1a1a1a;position:sticky;top:61px;z-index:19;overflow-x:auto}
+.tabs button{flex:1;white-space:nowrap;padding:13px 10px;border:none;background:transparent;color:#aaa;font-weight:bold;cursor:pointer}
 .tabs button.active{color:#fff;border-bottom:3px solid #16a34a}
 .section{display:none;padding:12px} .section.active{display:block}
+.subtabs{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto}
+.subtabs button{padding:9px 14px;border-radius:20px;border:1px solid #333;background:#1e1e1e;color:#ccc;font-weight:bold;cursor:pointer;white-space:nowrap}
+.subtabs button.active{background:#16a34a;color:#fff;border-color:#16a34a}
 .card{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px}
 .league{color:#22c55e;font-size:11px;font-weight:bold;text-transform:uppercase}
 .score-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
-.team{font-weight:bold;font-size:15px;flex:1} .sc{font-size:22px;font-weight:bold;color:#22c55e;min-width:50px;text-align:center}
-.status{text-align:center;font-size:11px;color:#fbbf24}
-.live{color:#ef4444;font-weight:bold}
-input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a2a;color:#fff;margin-bottom:8px}
+.team{font-weight:bold;font-size:15px;flex:1} .sc{font-size:22px;font-weight:bold;color:#22c55e;min-width:60px;text-align:center}
+.status{text-align:center;font-size:11px;color:#fbbf24} .live{color:#ef4444;font-weight:bold}
+select,input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a2a;color:#fff;margin-bottom:8px}
 button.send{width:100%;padding:13px;background:#16a34a;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:16px}
 .comment{background:#1e1e1e;border-radius:12px;padding:12px;margin-bottom:8px}
 .comment b{color:#22c55e} .comment small{color:#888}
-.news{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px}
-.news h3{font-size:15px;margin-bottom:5px} .news p{font-size:13px;color:#ccc}
-.refresh{text-align:center;padding:10px;color:#888;font-size:12px}
+.fav-btn{background:none;border:none;font-size:20px;cursor:pointer;margin-left:5px}
+.fav-btn.active{filter:none} .fav-btn:not(.active){filter:grayscale(1);opacity:.4}
+.report-btn{background:#333;color:#ccc;border:none;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;text-align:left;border-bottom:1px solid #333} th{color:#22c55e} td:nth-child(1),td:nth-child(3),td:nth-child(4){text-align:center}
+.video{background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.video img{width:100%;height:180px;object-fit:cover} .video div{padding:12px} .video h3{font-size:15px} .video p{font-size:12px;color:#aaa;margin-top:4px}
+.news{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px} .news h3{font-size:15px} .news p{font-size:13px;color:#ccc;margin-top:4px}
+.search-box{position:relative;margin-bottom:10px} .search-box input{padding-left:38px}
+.search-icon{position:absolute;left:12px;top:12px;font-size:16px}
 </style>
 </head>
 <body>
-<header><h1>⚽ MatchsLive</h1><p>Scores en direct • Commentaires partagés • Togo & Monde</p></header>
+<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement • Vidéos • Favoris</p></header>
 <div class="tabs">
 <button class="active" onclick="showTab('scores',this)">📊 Scores</button>
+<button onclick="showTab('classement',this)">🏆 Classement</button>
+<button onclick="showTab('videos',this)">🎥 Vidéos</button>
 <button onclick="showTab('comments',this)">💬 Commentaires</button>
 <button onclick="showTab('news',this)">📰 Actus</button>
 </div>
 
-<div id="scores" class="section active"><div class="refresh" id="lastUpdate">Chargement des matchs...</div><div id="matches"></div></div>
-
-<div id="comments" class="section">
-<div class="card"><h3>💬 Dis quelque chose, tout le monde va voir !</h3><br>
-<input id="userName" placeholder="Ton nom (ex: Dodji)" maxlength="20">
-<textarea id="commentText" rows="2" placeholder="Salut les gars, quel match !..." maxlength="200"></textarea>
-<button class="send" onclick="sendComment()">Envoyer 🚀</button>
-<p style="font-size:11px;color:#888;margin-top:6px;text-align:center">Commentaires publics - tout le monde voit ce que tu écris.</p></div>
-<div id="commentsList"><p style="text-align:center;color:#888">Chargement des commentaires...</p></div>
+<div id="scores" class="section active">
+<div class="search-box"><span class="search-icon">🔍</span><input id="searchInput" placeholder="Recherche une équipe : Real, Togo, Barça..." oninput="renderMatches()"></div>
+<div class="subtabs">
+<button class="active" onclick="setFilter('all',this)">Tous</button>
+<button onclick="setFilter('live',this)">🔴 Live</button>
+<button onclick="setFilter('upcoming',this)">📅 Prochains</button>
+<button onclick="setFilter('finished',this)">✅ Résultats</button>
+<button onclick="setFilter('favs',this)">❤️ Favoris</button>
+</div>
+<div id="matches"><p style="text-align:center;color:#888">Chargement...</p></div>
+<p style="text-align:center;color:#888;font-size:11px">Astuce : Clique sur ❤️ à côté d'une équipe pour la mettre en favoris !</p>
 </div>
 
-<div id="news" class="section"><div id="newsList"></div></div>
+<div id="classement" class="section">
+<select id="leagueSelect" onchange="loadStandings()">
+<option value="eng.1">🏴󐁧󐁢󐁥󐁮󐁧󐁿 Premier League</option>
+<option value="esp.1">🇪🇸 La Liga</option>
+<option value="fra.1">🇫🇷 Ligue 1</option>
+<option value="ita.1">🇮🇹 Serie A</option>
+<option value="ger.1">🇩🇪 Bundesliga</option>
+</select>
+<div id="standings"></div>
+</div>
+
+<div id="videos" class="section">
+<div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une vidéo : buts, CAN..." oninput="filterVideos()"></div>
+<div id="videosList"></div>
+</div>
+
+<div id="comments" class="section">
+<div class="card"><h3>💬 Tout le monde voit ce que tu écris !</h3><br>
+<input id="userName" placeholder="Ton nom (ex: Dodji)">
+<textarea id="commentText" rows="2" placeholder="Quel match les gars !..." maxlength="200"></textarea>
+<button class="send" onclick="sendComment()">Envoyer 🚀</button>
+<p style="font-size:11px;color:#888;margin-top:6px;text-align:center">Si quelqu'un dit un gros mot, clique sur 🚩 Signaler.</p></div>
+<div id="commentsList"></div>
+</div>
+
+<div id="news" class="section">
+<div class="search-box"><span class="search-icon">🔍</span><input id="newsSearch" placeholder="Recherche une actu : Togo, Mercato..." oninput="filterNews()"></div>
+<div id="newsList"></div>
+</div>
 
 <script>
-const FIREBASE_URL = "https://matchslive-5e96f-default-rtdb.firebaseio.com/comments.json";
-
-function showTab(id,btn){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
-document.getElementById(id).classList.add('active'); btn.classList.add('active');
-if(id==='comments') loadComments();
-}
-
-// --- SCORES ---
+const FIREBASE_URL="https://matchslive-5e96f-default-rtdb.firebaseio.com/comments.json";
+const REPORT_URL="https://matchslive-5e96f-default-rtdb.firebaseio.com/reports.json";
+let allEvents=[]; let currentFilter='all';
+let favs = JSON.parse(localStorage.getItem('ml_favs')||'[]');
+let allVideos=[]; let allNews=[];
+function showTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='comments')loadComments();if(id==='classement')loadStandings();if(id==='videos')loadVideos();}
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.subtabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderMatches();}
+function toggleFav(team,btn){if(favs.includes(team)){favs=favs.filter(t=>t!==team);}else{favs.push(team);alert(team+' ajouté à tes favoris ❤️');}localStorage.setItem('ml_favs',JSON.stringify(favs));renderMatches();}
 async function loadScores(){
-try{
-let res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?limit=100');
-let data = await res.json();
-let html='';
-let events = data.events || [];
-if(events.length===0) html='<div class="card" style="text-align:center">Aucun match en ce moment.<br>Reviens plus tard !</div>';
-events.slice(0,40).forEach(ev=>{
-let comp = ev.competitions[0];
-let home = comp.competitors.find(c=>c.homeAway==='home');
-let away = comp.competitors.find(c=>c.homeAway==='away');
-let status = comp.status.type.state;
-let label = comp.status.type.shortDetail || '';
-let isLive = status==='in';
-html+=`<div class="card"><div class="league">${ev.leagues?ev.leagues[0].name:'Football'} ${isLive?'<span class="live">● LIVE</span>':''}</div>
-<div class="score-row"><div class="team">${home.team.displayName}</div><div class="sc">${home.score||'0'} - ${away.score||'0'}</div><div class="team" style="text-align:right">${away.team.displayName}</div></div>
-<div class="status">${label}</div></div>`;
-});
-document.getElementById('matches').innerHTML=html;
-document.getElementById('lastUpdate').innerText='Mis à jour à '+new Date().toLocaleTimeString()+' • '+events.length+' matchs';
-}catch(e){document.getElementById('matches').innerHTML='<div class="card">Connexion faible... Réessaie.</div>';}
+try{let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?limit=100');let data=await res.json();allEvents=data.events||[];renderMatches();}catch(e){document.getElementById('matches').innerHTML='<div class="card">Connexion faible... Réessaie.</div>';}
 }
-
-// --- COMMENTAIRES PARTAGES AVEC FIREBASE ---
-async function loadComments(){
-try{
-let res = await fetch(FIREBASE_URL);
-let data = await res.json();
-let list = document.getElementById('commentsList');
-if(!data){list.innerHTML='<p style="text-align:center;color:#888">Aucun commentaire. Sois le premier ! 🔥</p>';return;}
-let arr = Object.values(data).sort((a,b)=>b.time-a.time);
-list.innerHTML = arr.slice(0,50).map(c=>`<div class="comment"><b>${escapeHtml(c.name||'Anonyme')}</b> <small>• ${new Date(c.time).toLocaleString()}</small><p style="margin-top:5px">${escapeHtml(c.text||'')}</p></div>`).join('');
-}catch(e){document.getElementById('commentsList').innerHTML='<p style="text-align:center">Erreur de chargement.</p>';}
+function renderMatches(){
+let query=(document.getElementById('searchInput').value||'').toLowerCase();
+let list=allEvents;
+if(currentFilter==='live') list=list.filter(ev=>ev.competitions[0].status.type.state==='in');
+if(currentFilter==='upcoming') list=list.filter(ev=>ev.competitions[0].status.type.state==='pre');
+if(currentFilter==='finished') list=list.filter(ev=>ev.competitions[0].status.type.state==='post');
+if(currentFilter==='favs') list=list.filter(ev=>{let c=ev.competitions[0];let h=c.competitors.find(x=>x.homeAway==='home');let a=c.competitors.find(x=>x.homeAway==='away');return favs.includes(h.team.displayName)||favs.includes(a.team.displayName);});
+if(query) list=list.filter(ev=>{let c=ev.competitions[0];let h=c.competitors.find(x=>x.homeAway==='home');let a=c.competitors.find(x=>x.homeAway==='away');return h.team.displayName.toLowerCase().includes(query)||a.team.displayName.toLowerCase().includes(query)||(ev.leagues?ev.leagues[0].name.toLowerCase().includes(query):false);});
+if(list.length===0){document.getElementById('matches').innerHTML='<div class="card" style="text-align:center">'+(currentFilter==='favs'?'Tu n\'as pas encore de favoris.<br>Clique sur ❤️ à côté d\'une équipe !':query?'Aucun match trouvé pour "'+query+'".':'Aucun match dans cette catégorie.')+'</div>';return;}
+document.getElementById('matches').innerHTML=list.slice(0,50).map(ev=>{
+let comp=ev.competitions[0];let home=comp.competitors.find(c=>c.homeAway==='home');let away=comp.competitors.find(c=>c.homeAway==='away');let state=comp.status.type.state;let label=comp.status.type.shortDetail||'';let isLive=state==='in';let score=state==='pre'?'VS':(home.score||'0')+' - '+(away.score||'0');
+let hFav=favs.includes(home.team.displayName)?'active':'';let aFav=favs.includes(away.team.displayName)?'active':'';
+return `<div class="card"><div class="league">${ev.leagues?ev.leagues[0].name:'Football'} ${isLive?'<span class="live">● LIVE</span>':''}</div><div class="score-row"><div class="team">${home.team.displayName} <button class="fav-btn ${hFav}" onclick="toggleFav('${home.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></div><div class="sc" style="${state==='pre'?'font-size:14px;color:#888':''}">${score}</div><div class="team" style="text-align:right"><button class="fav-btn ${aFav}" onclick="toggleFav('${away.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button> ${away.team.displayName}</div></div><div class="status">${label}</div></div>`;
+}).join('');
 }
+async function loadStandings(){let league=document.getElementById('leagueSelect').value;document.getElementById('standings').innerHTML='<p style="text-align:center;color:#888;padding:20px">Chargement...</p>';try{let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/standings`);let data=await res.json();let entries=data.children[0].standings.entries;let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';entries.slice(0,20).forEach((e,i)=>{html+=`<tr><td>${i+1}</td><td><b>${e.team.displayName}</b> <button class="fav-btn ${favs.includes(e.team.displayName)?'active':''}" onclick="toggleFav('${e.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></td><td>${e.stats.find(s=>s.name==='gamesPlayed').value}</td><td><b style="color:#22c55e">${e.stats.find(s=>s.name==='points').value}</b></td><td>${e.stats.find(s=>s.name==='pointDifferential').value}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}catch(e){document.getElementById('standings').innerHTML='<div class="card">Classement indisponible.</div>';}}
+function loadVideos(){
+allVideos=[
+{title:"Résumé : Les plus beaux buts de la semaine",desc:"Les buts qui ont fait vibrer tout le monde !",img:"https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=buts+semaine+football+highlights"},
+{title:"Ligue des Champions - Tous les buts",desc:"Le résumé complet de la dernière journée.",img:"https://i.ytimg.com/vi/3tmd-ClpJxA/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=ligue+des+champions+highlights"},
+{title:"CAN - Les meilleurs moments",desc:"L'Afrique en feu ! Les plus beaux moments de la CAN.",img:"https://i.ytimg.com/vi/2Vv-BfVoq4g/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=CAN+highlights+buts"},
+{title:"Premier League - Top Buts",desc:"L'Angleterre ne déçoit jamais !",img:"https://i.ytimg.com/vi/eKFTSSKCzWA/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=premier+league+highlights+buts"},
+{title:"Togo - Éperviers : Les plus beaux buts",desc:"Les Éperviers en action !",img:"https://i.ytimg.com/vi/09R8_2nJtjg/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=Togo+Eperviers+buts"}
+]; renderVideos(allVideos);
+}
+function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>`<a href="${v.link}" target="_blank" style="text-decoration:none;color:#fff"><div class="video"><img src="${v.img}"><div><h3>▶️ ${v.title}</h3><p>${v.desc}</p></div></div></a>`).join('');}
+function filterVideos(){let q=document.getElementById('videoSearch').value.toLowerCase();renderVideos(allVideos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)));}
 function escapeHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-async function sendComment(){
-let name=document.getElementById('userName').value.trim()||'Anonyme';
-let text=document.getElementById('commentText').value.trim();
-if(!text){alert('Écris quelque chose poto !');return;}
-localStorage.setItem('ml_name',name);
-let btn=document.querySelector('.send'); btn.innerText='Envoi...'; btn.disabled=true;
-await fetch(FIREBASE_URL,{method:'POST',body:JSON.stringify({name:name,text:text,time:Date.now()})});
-document.getElementById('commentText').value='';
-btn.innerText='Envoyer 🚀'; btn.disabled=false;
-loadComments();
-alert('Envoyé ! Tout le monde va voir ton commentaire 🔥');
+async function loadComments(){
+try{let res=await fetch(FIREBASE_URL);let data=await res.json();let list=document.getElementById('commentsList');
+if(!data){list.innerHTML='<p style="text-align:center;color:#888">Aucun commentaire. Sois le premier ! 🔥</p>';return;}
+let arr=Object.entries(data).sort((a,b)=>b[1].time-a[1].time);
+list.innerHTML=arr.slice(0,50).map(([key,c])=>`<div class="comment"><b>${escapeHtml(c.name||'Anonyme')}</b> <small>• ${new Date(c.time).toLocaleString()}</small><p style="margin-top:5px">${escapeHtml(c.text||'')}</p><button class="report-btn" onclick="reportComment('${key}','${escapeHtml(c.text||'').replace(/'/g,"")}')">🚩 Signaler</button></div>`).join('');}catch(e){}
 }
-
-// --- ACTUS ---
-function loadNews(){
-let news=[
-{title:"Mercato : Les gros transferts à suivre",text:"Les clubs européens bougent beaucoup. Reste branché pour les dernières rumeurs et officialisations."},
-{title:"Togo : Les Éperviers préparent les prochains matchs",text:"Le Togo travaille pour revenir fort. Les supporters attendent une grande performance."},
-{title:"Ligue des Champions : Que des chocs !",text:"Les plus grands clubs du monde s'affrontent. Qui va soulever le trophée cette année ?"},
-{title:"CAN : La bataille s'annonce chaude",text:"Les équipes africaines se préparent pour la CAN. Le niveau est de plus en plus élevé."}
-];
-document.getElementById('newsList').innerHTML=news.map(n=>`<div class="news"><h3>${n.title}</h3><p>${n.text}</p></div>`).join('');
+async function reportComment(key,text){
+if(!confirm('Tu veux signaler ce commentaire ?')) return;
+await fetch(REPORT_URL,{method:'POST',body:JSON.stringify({commentId:key,text:text,time:Date.now()})});
+alert('Merci poto ! On a bien reçu ton signalement 🚩 On va vérifier.');
 }
-
-document.getElementById('userName').value = localStorage.getItem('ml_name')||'';
-loadScores(); loadNews(); loadComments();
-setInterval(loadScores,60000);
-setInterval(loadComments,10000);
+async function sendComment(){let name=document.getElementById('userName').value.trim()||'Anonyme';let text=document.getElementById('commentText').value.trim();if(!text){alert('Écris quelque chose poto !');return;}localStorage.setItem('ml_name',name);await fetch(FIREBASE_URL,{method:'POST',body:JSON.stringify({name:name,text:text,time:Date.now()})});document.getElementById('commentText').value='';loadComments();alert('Envoyé ! Tout le monde voit 🔥');}
+function loadNews(){allNews=[{title:"Mercato : Les gros transferts à suivre",text:"Les clubs européens bougent beaucoup. Reste branché ! "},{title:"Togo : Les Éperviers préparent les prochains matchs",text:"Le Togo travaille pour revenir fort. Les supporters attendent une grande performance."},{title:"Ligue des Champions : Que des chocs !",text:"Les plus grands clubs du monde s'affrontent. Qui va soulever le trophée ?"},{title:"CAN : La bataille s'annonce chaude",text:"Les équipes africaines se préparent. Le niveau est de plus en plus élevé."}];renderNews(allNews);}
+function renderNews(list){document.getElementById('newsList').innerHTML=list.map(n=>`<div class="news"><h3>${n.title}</h3><p>${n.text}</p></div>`).join('');}
+function filterNews(){let q=document.getElementById('newsSearch').value.toLowerCase();renderNews(allNews.filter(n=>n.title.toLowerCase().includes(q)||n.text.toLowerCase().includes(q)));}
+document.getElementById('userName').value=localStorage.getItem('ml_name')||'';
+loadScores();loadNews();loadComments();loadVideos();
+setInterval(loadScores,60000);setInterval(loadComments,10000);
 </script>
 </body>
 </html>
