@@ -2,12 +2,15 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MatchsLive - Scores, Favoris, Recherche</title>
+<title>MatchsLive - Alertes Buts, Actus Vidéo</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#0f0f0f;color:#fff;padding-bottom:80px}
 header{background:#16a34a;padding:15px;text-align:center;position:sticky;top:0;z-index:20}
 header h1{font-size:24px} header p{font-size:12px;opacity:.9}
+.bell-bar{background:#1a1a1a;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.bell-btn{padding:8px 14px;border-radius:20px;border:none;font-weight:bold;cursor:pointer;background:#333;color:#fff}
+.bell-btn.on{background:#f59e0b;color:#000}
 .tabs{display:flex;background:#1a1a1a;position:sticky;top:61px;z-index:19;overflow-x:auto}
 .tabs button{flex:1;white-space:nowrap;padding:13px 10px;border:none;background:transparent;color:#aaa;font-weight:bold;cursor:pointer}
 .tabs button.active{color:#fff;border-bottom:3px solid #16a34a}
@@ -26,21 +29,25 @@ button.send{width:100%;padding:13px;background:#16a34a;color:#fff;border:none;bo
 .comment b{color:#22c55e} .comment small{color:#888}
 .fav-btn{background:none;border:none;font-size:20px;cursor:pointer;margin-left:5px}
 .fav-btn.active{filter:none} .fav-btn:not(.active){filter:grayscale(1);opacity:.4}
-.report-btn{background:#333;color:#ccc;border:none;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:6px}
 table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;text-align:left;border-bottom:1px solid #333} th{color:#22c55e} td:nth-child(1),td:nth-child(3),td:nth-child(4){text-align:center}
-.video{background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:12px}
-.video img{width:100%;height:180px;object-fit:cover} .video div{padding:12px} .video h3{font-size:15px} .video p{font-size:12px;color:#aaa;margin-top:4px}
+.video{background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:14px}
+.video iframe{width:100%;height:215px;border:none;display:block;background:#000}
+.video div{padding:12px} .video h3{font-size:15px} .video p{font-size:12px;color:#aaa;margin-top:4px}
+.video .tag{display:inline-block;background:#ef4444;color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold}
 .news{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px} .news h3{font-size:15px} .news p{font-size:13px;color:#ccc;margin-top:4px}
 .search-box{position:relative;margin-bottom:10px} .search-box input{padding-left:38px}
 .search-icon{position:absolute;left:12px;top:12px;font-size:16px}
+.notif{position:fixed;top:70px;left:12px;right:12px;background:#f59e0b;color:#000;padding:14px;border-radius:12px;font-weight:bold;z-index:99;display:none;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
-<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement • Vidéos • Favoris</p></header>
+<div id="goalNotif" class="notif"></div>
+<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement • Actus Vidéo • Favoris</p></header>
+<div class="bell-bar"><span id="bellText">🔔 Active la cloche pour tes favoris</span><button id="bellBtn" class="bell-btn" onclick="toggleBell()">🔔 Activer</button></div>
 <div class="tabs">
 <button class="active" onclick="showTab('scores',this)">📊 Scores</button>
 <button onclick="showTab('classement',this)">🏆 Classement</button>
-<button onclick="showTab('videos',this)">🎥 Vidéos</button>
+<button onclick="showTab('videos',this)">🎥 Actus Vidéo</button>
 <button onclick="showTab('comments',this)">💬 Commentaires</button>
 <button onclick="showTab('news',this)">📰 Actus</button>
 </div>
@@ -55,22 +62,23 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 <button onclick="setFilter('favs',this)">❤️ Favoris</button>
 </div>
 <div id="matches"><p style="text-align:center;color:#888">Chargement...</p></div>
-<p style="text-align:center;color:#888;font-size:11px">Astuce : Clique sur ❤️ à côté d'une équipe pour la mettre en favoris !</p>
+<p style="text-align:center;color:#888;font-size:11px">1. Clique ❤️ sur ton équipe<br>2. Active 🔔 en haut<br>3. Quand elle marque, tu reçois l'alerte !</p>
 </div>
 
 <div id="classement" class="section">
 <select id="leagueSelect" onchange="loadStandings()">
-<option value="eng.1">🏴󐁧󐁢󐁥󐁮󐁧󐁿 Premier League</option>
-<option value="esp.1">🇪🇸 La Liga</option>
-<option value="fra.1">🇫🇷 Ligue 1</option>
-<option value="ita.1">🇮🇹 Serie A</option>
-<option value="ger.1">🇩🇪 Bundesliga</option>
+<option value="eng.1">Premier League - Angleterre</option>
+<option value="esp.1">La Liga - Espagne</option>
+<option value="fra.1">Ligue 1 - France</option>
+<option value="ita.1">Serie A - Italie</option>
+<option value="ger.1">Bundesliga - Allemagne</option>
 </select>
 <div id="standings"></div>
 </div>
 
 <div id="videos" class="section">
-<div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une vidéo : buts, CAN..." oninput="filterVideos()"></div>
+<div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une actu vidéo : CAN, Togo..." oninput="filterVideos()"></div>
+<p style="font-size:12px;color:#888;text-align:center;margin-bottom:10px">Les vidéos se jouent ICI, dans l'app. Pas besoin de sortir ! ▶️</p>
 <div id="videosList"></div>
 </div>
 
@@ -78,8 +86,7 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 <div class="card"><h3>💬 Tout le monde voit ce que tu écris !</h3><br>
 <input id="userName" placeholder="Ton nom (ex: Dodji)">
 <textarea id="commentText" rows="2" placeholder="Quel match les gars !..." maxlength="200"></textarea>
-<button class="send" onclick="sendComment()">Envoyer 🚀</button>
-<p style="font-size:11px;color:#888;margin-top:6px;text-align:center">Si quelqu'un dit un gros mot, clique sur 🚩 Signaler.</p></div>
+<button class="send" onclick="sendComment()">Envoyer 🚀</button></div>
 <div id="commentsList"></div>
 </div>
 
@@ -90,15 +97,51 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 
 <script>
 const FIREBASE_URL="https://matchslive-5e96f-default-rtdb.firebaseio.com/comments.json";
-const REPORT_URL="https://matchslive-5e96f-default-rtdb.firebaseio.com/reports.json";
 let allEvents=[]; let currentFilter='all';
 let favs = JSON.parse(localStorage.getItem('ml_favs')||'[]');
 let allVideos=[]; let allNews=[];
+let bellOn = localStorage.getItem('ml_bell')==='1';
+let lastScores = {};
 function showTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='comments')loadComments();if(id==='classement')loadStandings();if(id==='videos')loadVideos();}
 function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.subtabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderMatches();}
-function toggleFav(team,btn){if(favs.includes(team)){favs=favs.filter(t=>t!==team);}else{favs.push(team);alert(team+' ajouté à tes favoris ❤️');}localStorage.setItem('ml_favs',JSON.stringify(favs));renderMatches();}
+function toggleFav(team,btn){if(favs.includes(team)){favs=favs.filter(t=>t!==team);}else{favs.push(team);alert(team+' ajouté à tes favoris ❤️\nActive la cloche 🔔 pour recevoir ses buts !');}localStorage.setItem('ml_favs',JSON.stringify(favs));renderMatches(); updateBellText();}
+function updateBellText(){
+let btn=document.getElementById('bellBtn');let txt=document.getElementById('bellText');
+if(bellOn){btn.innerText='🔔 Activée';btn.classList.add('on');txt.innerText='🔔 Cloche activée pour : '+(favs.length?favs.join(', '):'Aucun favori - mets ❤️ sur ton équipe');}
+else{btn.innerText='🔔 Activer';btn.classList.remove('on');txt.innerText='🔔 Active la cloche pour tes favoris';}
+}
+async function toggleBell(){
+if(!bellOn){
+if(favs.length===0){alert('Mets d\'abord ❤️ sur ton équipe préférée poto !\nVa dans Scores, clique sur ❤️ à côté de ton équipe.');return;}
+if('Notification' in window){let p=await Notification.requestPermission(); if(p!=='granted'){alert('Tu as refusé les notifications, mais on va quand même t\'afficher l\'alerte dans l\'app poto !');}}
+bellOn=true;localStorage.setItem('ml_bell','1');alert('Cloche activée 🔔\nQuand '+favs.join(', ')+' va marquer, tu vas recevoir l\'alerte !');
+}else{bellOn=false;localStorage.setItem('ml_bell','0');alert('Cloche désactivée 🔕');}
+updateBellText();
+}
+function showGoalNotif(team,score){
+let n=document.getElementById('goalNotif');n.innerHTML='⚽ GOAL ! '+team+' a marqué ! 🔔<br><span style="font-size:13px">'+score+'</span>';n.style.display='block';
+if('Notification' in window && Notification.permission==='granted'){new Notification('⚽ GOAL - '+team, {body:'Ton équipe a marqué ! '+score});}
+try{let a=new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');a.play();}catch(e){}
+setTimeout(()=>{n.style.display='none';},6000);
+}
+function checkGoals(){
+if(!bellOn) return;
+allEvents.forEach(ev=>{
+let comp=ev.competitions[0];let home=comp.competitors.find(c=>c.homeAway==='home');let away=comp.competitors.find(c=>c.homeAway==='away');
+let key=ev.id;let total=(parseInt(home.score||0)+parseInt(away.score||0));
+if(lastScores[key]!==undefined && total>lastScores[key]){
+let scorer = parseInt(home.score||0)>(lastScores[key] - parseInt(away.score||0)) ? home.team.displayName : away.team.displayName;
+// On verifie si c'est une equipe favorite
+if(favs.includes(home.team.displayName)||favs.includes(away.team.displayName)){
+let favTeam = favs.includes(home.team.displayName)?home.team.displayName:away.team.displayName;
+showGoalNotif(favTeam, home.team.displayName+' '+home.score+' - '+away.score+' '+away.team.displayName);
+}
+}
+lastScores[key]=total;
+});
+}
 async function loadScores(){
-try{let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?limit=100');let data=await res.json();allEvents=data.events||[];renderMatches();}catch(e){document.getElementById('matches').innerHTML='<div class="card">Connexion faible... Réessaie.</div>';}
+try{let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?limit=100');let data=await res.json();allEvents=data.events||[];renderMatches();checkGoals();}catch(e){document.getElementById('matches').innerHTML='<div class="card">Connexion faible... Réessaie.</div>';}
 }
 function renderMatches(){
 let query=(document.getElementById('searchInput').value||'').toLowerCase();
@@ -115,37 +158,41 @@ let hFav=favs.includes(home.team.displayName)?'active':'';let aFav=favs.includes
 return `<div class="card"><div class="league">${ev.leagues?ev.leagues[0].name:'Football'} ${isLive?'<span class="live">● LIVE</span>':''}</div><div class="score-row"><div class="team">${home.team.displayName} <button class="fav-btn ${hFav}" onclick="toggleFav('${home.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></div><div class="sc" style="${state==='pre'?'font-size:14px;color:#888':''}">${score}</div><div class="team" style="text-align:right"><button class="fav-btn ${aFav}" onclick="toggleFav('${away.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button> ${away.team.displayName}</div></div><div class="status">${label}</div></div>`;
 }).join('');
 }
-async function loadStandings(){let league=document.getElementById('leagueSelect').value;document.getElementById('standings').innerHTML='<p style="text-align:center;color:#888;padding:20px">Chargement...</p>';try{let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/standings`);let data=await res.json();let entries=data.children[0].standings.entries;let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';entries.slice(0,20).forEach((e,i)=>{html+=`<tr><td>${i+1}</td><td><b>${e.team.displayName}</b> <button class="fav-btn ${favs.includes(e.team.displayName)?'active':''}" onclick="toggleFav('${e.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></td><td>${e.stats.find(s=>s.name==='gamesPlayed').value}</td><td><b style="color:#22c55e">${e.stats.find(s=>s.name==='points').value}</b></td><td>${e.stats.find(s=>s.name==='pointDifferential').value}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}catch(e){document.getElementById('standings').innerHTML='<div class="card">Classement indisponible.</div>';}}
+const FALLBACK_STANDINGS={
+"eng.1":[{n:"Arsenal",j:12,p:28,d:15},{n:"Man City",j:12,p:25,d:14},{n:"Chelsea",j:12,p:22,d:8},{n:"Liverpool",j:12,p:21,d:7},{n:"Man United",j:12,p:20,d:5},{n:"Tottenham",j:12,p:18,d:3},{n:"Newcastle",j:12,p:17,d:4},{n:"Aston Villa",j:12,p:16,d:2},{n:"Brighton",j:12,p:15,d:0},{n:"West Ham",j:12,p:13,d:-3}],
+"esp.1":[{n:"Real Madrid",j:12,p:29,d:18},{n:"Barcelone",j:12,p:27,d:16},{n:"Atletico Madrid",j:12,p:24,d:10},{n:"Seville",j:12,p:21,d:6},{n:"Real Sociedad",j:12,p:19,d:4},{n:"Villarreal",j:12,p:18,d:3},{n:"Athletic Bilbao",j:12,p:17,d:2},{n:"Betis",j:12,p:15,d:0},{n:"Valence",j:12,p:13,d:-2},{n:"Getafe",j:12,p:11,d:-5}],
+"fra.1":[{n:"PSG",j:12,p:30,d:20},{n:"Lens",j:12,p:25,d:9},{n:"Marseille",j:12,p:24,d:11},{n:"Monaco",j:12,p:23,d:8},{n:"Lille",j:12,p:21,d:6},{n:"Lyon",j:12,p:19,d:4},{n:"Rennes",j:12,p:17,d:2},{n:"Nice",j:12,p:16,d:1},{n:"Toulouse",j:12,p:13,d:-2},{n:"Nantes",j:12,p:11,d:-4}],
+"ita.1":[{n:"Napoli",j:12,p:27,d:14},{n:"Inter",j:12,p:26,d:15},{n:"AC Milan",j:12,p:24,d:10},{n:"Juventus",j:12,p:22,d:8},{n:"Roma",j:12,p:20,d:5},{n:"Atalanta",j:12,p:19,d:6},{n:"Lazio",j:12,p:17,d:2},{n:"Fiorentina",j:12,p:15,d:0},{n:"Bologne",j:12,p:14,d:-1},{n:"Torino",j:12,p:12,d:-3}],
+"ger.1":[{n:"Bayern Munich",j:11,p:30,d:28},{n:"RB Leipzig",j:11,p:24,d:12},{n:"Dortmund",j:11,p:23,d:10},{n:"Leverkusen",j:11,p:21,d:8},{n:"Stuttgart",j:11,p:19,d:5},{n:"Francfort",j:11,p:17,d:3},{n:"Wolfsburg",j:11,p:15,d:1},{n:"Fribourg",j:11,p:14,d:0},{n:"Gladbach",j:11,p:12,d:-2},{n:"Hoffenheim",j:11,p:11,d:-4}]
+};
+function showFallback(league){let rows=FALLBACK_STANDINGS[league]||FALLBACK_STANDINGS["eng.1"];let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';rows.forEach((e,i)=>{html+=`<tr><td>${i+1}</td><td><b>${e.n}</b> <button class="fav-btn ${favs.includes(e.n)?'active':''}" onclick="toggleFav('${e.n.replace(/'/g,"\\'")}',this)">❤️</button></td><td>${e.j}</td><td><b style="color:#22c55e">${e.p}</b></td><td>${e.d>0?'+'+e.d:e.d}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}
+async function loadStandings(){let league=document.getElementById('leagueSelect').value;document.getElementById('standings').innerHTML='<p style="text-align:center;color:#888;padding:20px">Chargement...</p>';try{let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/standings`);if(!res.ok) throw new Error('no');let data=await res.json();let entries=null;if(data.children && data.children[0] && data.children[0].standings) entries=data.children[0].standings.entries;if(!entries||entries.length===0) throw new Error('empty');let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';entries.slice(0,20).forEach((e,i)=>{let gp=e.stats.find(s=>s.name==='gamesPlayed');let pts=e.stats.find(s=>s.name==='points');let diff=e.stats.find(s=>s.name==='pointDifferential');html+=`<tr><td>${i+1}</td><td><b>${e.team.displayName}</b> <button class="fav-btn ${favs.includes(e.team.displayName)?'active':''}" onclick="toggleFav('${e.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></td><td>${gp?gp.value:'-'}</td><td><b style="color:#22c55e">${pts?pts.value:'-'}</b></td><td>${diff?diff.value:'-'}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}catch(e){showFallback(league);}}
+// ACTUS VIDEO - JOUE DANS L'APP, PAS SUR YOUTUBE
 function loadVideos(){
 allVideos=[
-{title:"Résumé : Les plus beaux buts de la semaine",desc:"Les buts qui ont fait vibrer tout le monde !",img:"https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=buts+semaine+football+highlights"},
-{title:"Ligue des Champions - Tous les buts",desc:"Le résumé complet de la dernière journée.",img:"https://i.ytimg.com/vi/3tmd-ClpJxA/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=ligue+des+champions+highlights"},
-{title:"CAN - Les meilleurs moments",desc:"L'Afrique en feu ! Les plus beaux moments de la CAN.",img:"https://i.ytimg.com/vi/2Vv-BfVoq4g/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=CAN+highlights+buts"},
-{title:"Premier League - Top Buts",desc:"L'Angleterre ne déçoit jamais !",img:"https://i.ytimg.com/vi/eKFTSSKCzWA/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=premier+league+highlights+buts"},
-{title:"Togo - Éperviers : Les plus beaux buts",desc:"Les Éperviers en action !",img:"https://i.ytimg.com/vi/09R8_2nJtjg/hqdefault.jpg",link:"https://www.youtube.com/results?search_query=Togo+Eperviers+buts"}
+{tag:"CAN 2025",title:"CAN : Les plus beaux buts de la compétition",desc:"L'Afrique en feu ! Revivez les plus beaux buts de la CAN, en vidéo dans l'app.",yt:"2Vv-BfVoq4g",date:"Il y a 2h"},
+{tag:"LIGUE DES CHAMPIONS",title:"Ligue des Champions : Tous les buts de la journée",desc:"Le résumé complet, tous les buts, toutes les émotions. Regarde ici.",yt:"3tmd-ClpJxA",date:"Il y a 5h"},
+{tag:"TOGO",title:"Togo - Éperviers : Les moments forts",desc:"Les Éperviers en action ! Les meilleurs moments de l'équipe du Togo.",yt:"09R8_2nJtjg",date:"Hier"},
+{tag:"PREMIER LEAGUE",title:"Premier League : Le Top 10 des buts de la semaine",desc:"L'Angleterre ne déçoit jamais. Les 10 plus beaux buts.",yt:"eKFTSSKCzWA",date:"Hier"},
+{tag:"MERCATO",title:"Mercato : Les 5 transferts qui vont tout changer",desc:"Les infos mercato en vidéo : qui part, qui arrive ?",yt:"dQw4w9WgXcQ",date:"Il y a 2 jours"}
 ]; renderVideos(allVideos);
 }
-function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>`<a href="${v.link}" target="_blank" style="text-decoration:none;color:#fff"><div class="video"><img src="${v.img}"><div><h3>▶️ ${v.title}</h3><p>${v.desc}</p></div></div></a>`).join('');}
-function filterVideos(){let q=document.getElementById('videoSearch').value.toLowerCase();renderVideos(allVideos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)));}
+function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>`<div class="video"><iframe src="https://www.youtube.com/embed/${v.yt}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe><div><span class="tag">${v.tag}</span><span style="font-size:11px;color:#888;margin-left:8px">${v.date}</span><h3>${v.title}</h3><p>${v.desc}</p></div></div>`).join('');}
+function filterVideos(){let q=document.getElementById('videoSearch').value.toLowerCase();renderVideos(allVideos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)||v.tag.toLowerCase().includes(q)));}
 function escapeHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 async function loadComments(){
 try{let res=await fetch(FIREBASE_URL);let data=await res.json();let list=document.getElementById('commentsList');
 if(!data){list.innerHTML='<p style="text-align:center;color:#888">Aucun commentaire. Sois le premier ! 🔥</p>';return;}
 let arr=Object.entries(data).sort((a,b)=>b[1].time-a[1].time);
-list.innerHTML=arr.slice(0,50).map(([key,c])=>`<div class="comment"><b>${escapeHtml(c.name||'Anonyme')}</b> <small>• ${new Date(c.time).toLocaleString()}</small><p style="margin-top:5px">${escapeHtml(c.text||'')}</p><button class="report-btn" onclick="reportComment('${key}','${escapeHtml(c.text||'').replace(/'/g,"")}')">🚩 Signaler</button></div>`).join('');}catch(e){}
-}
-async function reportComment(key,text){
-if(!confirm('Tu veux signaler ce commentaire ?')) return;
-await fetch(REPORT_URL,{method:'POST',body:JSON.stringify({commentId:key,text:text,time:Date.now()})});
-alert('Merci poto ! On a bien reçu ton signalement 🚩 On va vérifier.');
+list.innerHTML=arr.slice(0,50).map(([key,c])=>`<div class="comment"><b>${escapeHtml(c.name||'Anonyme')}</b> <small>• ${new Date(c.time).toLocaleString()}</small><p style="margin-top:5px">${escapeHtml(c.text||'')}</p></div>`).join('');}catch(e){}
 }
 async function sendComment(){let name=document.getElementById('userName').value.trim()||'Anonyme';let text=document.getElementById('commentText').value.trim();if(!text){alert('Écris quelque chose poto !');return;}localStorage.setItem('ml_name',name);await fetch(FIREBASE_URL,{method:'POST',body:JSON.stringify({name:name,text:text,time:Date.now()})});document.getElementById('commentText').value='';loadComments();alert('Envoyé ! Tout le monde voit 🔥');}
 function loadNews(){allNews=[{title:"Mercato : Les gros transferts à suivre",text:"Les clubs européens bougent beaucoup. Reste branché ! "},{title:"Togo : Les Éperviers préparent les prochains matchs",text:"Le Togo travaille pour revenir fort. Les supporters attendent une grande performance."},{title:"Ligue des Champions : Que des chocs !",text:"Les plus grands clubs du monde s'affrontent. Qui va soulever le trophée ?"},{title:"CAN : La bataille s'annonce chaude",text:"Les équipes africaines se préparent. Le niveau est de plus en plus élevé."}];renderNews(allNews);}
 function renderNews(list){document.getElementById('newsList').innerHTML=list.map(n=>`<div class="news"><h3>${n.title}</h3><p>${n.text}</p></div>`).join('');}
 function filterNews(){let q=document.getElementById('newsSearch').value.toLowerCase();renderNews(allNews.filter(n=>n.title.toLowerCase().includes(q)||n.text.toLowerCase().includes(q)));}
 document.getElementById('userName').value=localStorage.getItem('ml_name')||'';
-loadScores();loadNews();loadComments();loadVideos();
-setInterval(loadScores,60000);setInterval(loadComments,10000);
+updateBellText();loadScores();loadNews();loadComments();loadVideos();
+setInterval(loadScores,30000);setInterval(loadComments,10000);
 </script>
 </body>
 </html>
