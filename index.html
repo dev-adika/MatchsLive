@@ -38,11 +38,10 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 .search-box{position:relative;margin-bottom:10px} .search-box input{padding-left:38px}
 .search-icon{position:absolute;left:12px;top:12px;font-size:16px}
 .notif{position:fixed;top:70px;left:12px;right:12px;background:#f59e0b;color:#000;padding:14px;border-radius:12px;font-weight:bold;z-index:99;display:none;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-/* BOUTON WHATSAPP POT0 */
+/* 1 SEUL BOUTON WHATSAPP - EN BAS A DROITE POT0 */
 .wa-float{position:fixed;bottom:18px;right:16px;z-index:100;width:58px;height:58px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;text-decoration:none;box-shadow:0 4px 15px rgba(37,211,102,.6);animation:waPulse 2s infinite}
 @keyframes waPulse{0%{box-shadow:0 0 0 0 rgba(37,211,102,.5)}70%{box-shadow:0 0 0 12px rgba(37,211,102,0)}100%{box-shadow:0 0 0 0 rgba(37,211,102,0)}}
 .wa-label{position:fixed;bottom:32px;right:82px;z-index:100;background:#fff;color:#000;font-size:12px;font-weight:bold;padding:6px 10px;border-radius:20px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
-.share-btn{background:#25D366;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:bold;cursor:pointer;margin-top:8px}
 </style>
 </head>
 <body>
@@ -100,9 +99,9 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 <div id="newsList"></div>
 </div>
 
-<!-- BOUTON WHATSAPP FLOTTANT POT0 -->
-<div class="wa-label">Discuter sur WhatsApp 💬</div>
-<a class="wa-float" href="https://wa.me/22897528950?text=Salut%20MatchsLive%20!%20Je%20viens%20de%20ton%20site%20⚽" target="_blank" title="WhatsApp MatchsLive">💬</a>
+<!-- 1 SEUL BOUTON WHATSAPP POT0 - EN BAS A DROITE -->
+<div class="wa-label">Un problème ? Commander ? 💬</div>
+<a class="wa-float" href="https://wa.me/22897528950?text=Salut%20MatchsLive%20!%20J%27ai%20un%20probl%C3%A8me%20%2F%20Je%20veux%20commander%20quelque%20chose%20%E2%9A%BD" target="_blank" title="WhatsApp MatchsLive">💬</a>
 
 <script>
 const FIREBASE_URL="https://matchslive-5e96f-default-rtdb.firebaseio.com/comments.json";
@@ -147,10 +146,6 @@ showGoalNotif(favTeam, home.team.displayName+' '+home.score+' - '+away.score+' '
 lastScores[key]=total;
 });
 }
-function shareOnWhatsApp(home,away,score){
-let text='⚽ MatchsLive : '+home+' '+score+' '+away+' - Regarde les scores en direct ici : https://matchslive.onrender.com';
-window.open('https://wa.me/22897528950?text='+encodeURIComponent(text),'_blank');
-}
 async function loadScores(){
 try{let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard?limit=100');let data=await res.json();allEvents=data.events||[];renderMatches();checkGoals();}catch(e){document.getElementById('matches').innerHTML='<div class="card">Connexion faible... Réessaie.</div>';}
 }
@@ -166,7 +161,7 @@ if(list.length===0){document.getElementById('matches').innerHTML='<div class="ca
 document.getElementById('matches').innerHTML=list.slice(0,50).map(ev=>{
 let comp=ev.competitions[0];let home=comp.competitors.find(c=>c.homeAway==='home');let away=comp.competitors.find(c=>c.homeAway==='away');let state=comp.status.type.state;let label=comp.status.type.shortDetail||'';let isLive=state==='in';let score=state==='pre'?'VS':(home.score||'0')+' - '+(away.score||'0');
 let hFav=favs.includes(home.team.displayName)?'active':'';let aFav=favs.includes(away.team.displayName)?'active':'';
-return `<div class="card"><div class="league">${ev.leagues?ev.leagues[0].name:'Football'} ${isLive?'<span class="live">● LIVE</span>':''}</div><div class="score-row"><div class="team">${home.team.displayName} <button class="fav-btn ${hFav}" onclick="toggleFav('${home.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></div><div class="sc" style="${state==='pre'?'font-size:14px;color:#888':''}">${score}</div><div class="team" style="text-align:right"><button class="fav-btn ${aFav}" onclick="toggleFav('${away.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button> ${away.team.displayName}</div></div><div class="status">${label}</div><button class="share-btn" onclick="shareOnWhatsApp('${home.team.displayName.replace(/'/g,"")}','${away.team.displayName.replace(/'/g,"")}','${score}')">📤 Partager sur WhatsApp</button></div>`;
+return `<div class="card"><div class="league">${ev.leagues?ev.leagues[0].name:'Football'} ${isLive?'<span class="live">● LIVE</span>':''}</div><div class="score-row"><div class="team">${home.team.displayName} <button class="fav-btn ${hFav}" onclick="toggleFav('${home.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button></div><div class="sc" style="${state==='pre'?'font-size:14px;color:#888':''}">${score}</div><div class="team" style="text-align:right"><button class="fav-btn ${aFav}" onclick="toggleFav('${away.team.displayName.replace(/'/g,"\\'")}',this)">❤️</button> ${away.team.displayName}</div></div><div class="status">${label}</div></div>`;
 }).join('');
 }
 const FALLBACK_STANDINGS={
@@ -205,4 +200,4 @@ updateBellText();loadScores();loadNews();loadComments();loadVideos();
 setInterval(loadScores,30000);setInterval(loadComments,10000);
 </script>
 </body>
-</html>
+</html>S
