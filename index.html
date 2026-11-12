@@ -40,7 +40,6 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 .video div.info{padding:12px} .video h3{font-size:15px} .video p{font-size:12px;color:#aaa;margin-top:4px}
 .video .tag{display:inline-block;background:#16a34a;color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold}
 .video .tag-long{display:inline-block;background:#f59e0b;color:#000;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold;margin-left:5px}
-.video .open-btn{display:inline-block;margin-top:10px;padding:10px 16px;background:#00AAFF;color:#fff;border-radius:20px;font-weight:bold;text-decoration:none;font-size:13px}
 .news{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px;overflow:hidden;border-left:4px solid #22c55e}
 .news h3{font-size:15px;line-height:1.3} .news p{font-size:13px;color:#ccc;margin-top:6px;line-height:1.4}
 .news small{color:#22c55e;font-size:11px;font-weight:bold}
@@ -95,9 +94,9 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 </div>
 
 <div id="videos" class="section">
-<div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une vidéo en FR : Foot, Série, Film..." oninput="filterVideos()"></div>
-<p style="font-size:12px;color:#888;text-align:center;margin-bottom:6px">🎬 Comme avant, horizontale • Ça joue vraiment ! • Ça change chaque jour !</p>
-<p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:6px">⚽ Foot + 🎬 Séries en FR pour la mi-temps 😁</p>
+<div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une vidéo en FR : Foot, Série..." oninput="filterVideos()"></div>
+<p style="font-size:12px;color:#888;text-align:center;margin-bottom:6px">🎬 Comme avant, horizontale • Clique 2 fois : 1 fois sur la photo, 1 fois sur Play dans le lecteur !</p>
+<p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:6px">⚽ Foot + 🎬 Séries en FR pour la mi-temps 😁 • Ça change chaque jour !</p>
 <p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:10px">📅 Vidéos du jour : <b id="videoDateText"></b></p>
 <div style="text-align:center;margin-bottom:10px"><button onclick="loadVideos(true)" style="padding:8px 16px;border-radius:20px;border:none;background:#16a34a;color:#fff;font-weight:bold;cursor:pointer">🔄 Actualiser les vidéos</button></div>
 <div id="videosList"></div>
@@ -156,19 +155,18 @@ function renderMatches(){let query=(document.getElementById('searchInput').value
 const FALLBACK_STANDINGS={"eng.1":[{n:"Arsenal",j:12,p:28,d:15},{n:"Man City",j:12,p:25,d:14},{n:"Chelsea",j:12,p:22,d:8},{n:"Liverpool",j:12,p:21,d:7},{n:"Man United",j:12,p:20,d:5},{n:"Tottenham",j:12,p:18,d:3},{n:"Newcastle",j:12,p:17,d:4},{n:"Aston Villa",j:12,p:16,d:2},{n:"Brighton",j:12,p:15,d:0},{n:"West Ham",j:12,p:13,d:-3}],"esp.1":[{n:"Real Madrid",j:12,p:29,d:18},{n:"Barcelone",j:12,p:27,d:16},{n:"Atletico Madrid",j:12,p:24,d:10},{n:"Seville",j:12,p:21,d:6},{n:"Real Sociedad",j:12,p:19,d:4},{n:"Villarreal",j:12,p:18,d:3},{n:"Athletic Bilbao",j:12,p:17,d:2},{n:"Betis",j:12,p:15,d:0},{n:"Valence",j:12,p:13,d:-2},{n:"Getafe",j:12,p:11,d:-5}],"fra.1":[{n:"PSG",j:12,p:30,d:20},{n:"Lens",j:12,p:25,d:9},{n:"Marseille",j:12,p:24,d:11},{n:"Monaco",j:12,p:23,d:8},{n:"Lille",j:12,p:21,d:6},{n:"Lyon",j:12,p:19,d:4},{n:"Rennes",j:12,p:17,d:2},{n:"Nice",j:12,p:16,d:1},{n:"Toulouse",j:12,p:13,d:-2},{n:"Nantes",j:12,p:11,d:-4}],"ita.1":[{n:"Napoli",j:12,p:27,d:14},{n:"Inter",j:12,p:26,d:15},{n:"AC Milan",j:12,p:24,d:10},{n:"Juventus",j:12,p:22,d:8},{n:"Roma",j:12,p:20,d:5},{n:"Atalanta",j:12,p:19,d:6},{n:"Lazio",j:12,p:17,d:2},{n:"Fiorentina",j:12,p:15,d:0},{n:"Bologne",j:12,p:14,d:-1},{n:"Torino",j:12,p:12,d:-3}],"ger.1":[{n:"Bayern Munich",j:11,p:30,d:28},{n:"RB Leipzig",j:11,p:24,d:12},{n:"Dortmund",j:11,p:23,d:10},{n:"Leverkusen",j:11,p:21,d:8},{n:"Stuttgart",j:11,p:19,d:5},{n:"Francfort",j:11,p:17,d:3},{n:"Wolfsburg",j:11,p:15,d:1},{n:"Fribourg",j:11,p:14,d:0},{n:"Gladbach",j:11,p:12,d:-2},{n:"Hoffenheim",j:11,p:11,d:-4}]};
 function showFallback(league){let rows=FALLBACK_STANDINGS[league]||FALLBACK_STANDINGS["eng.1"];let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';rows.forEach((e,i)=>{html+=`<tr><td>${i+1}</td><td><b>${e.n}</b></td><td>${e.j}</td><td><b style="color:#22c55e">${e.p}</b></td><td>${e.d}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}
 async function loadStandings(){let league=document.getElementById('leagueSelect').value;document.getElementById('standings').innerHTML='<p style="text-align:center;color:#888;padding:20px">Chargement...</p>';try{let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/standings`);if(!res.ok) throw new Error('no');let data=await res.json();let entries=data.children[0].standings.entries;let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';entries.slice(0,10).forEach((e,i)=>{let gp=e.stats.find(s=>s.name==='gamesPlayed');let pts=e.stats.find(s=>s.name==='points');let diff=e.stats.find(s=>s.name==='pointDifferential');html+=`<tr><td>${i+1}</td><td><b>${e.team.displayName}</b></td><td>${gp?gp.value:'-'}</td><td><b style="color:#22c55e">${pts?pts.value:'-'}</b></td><td>${diff?diff.value:'-'}</td></tr>`;});html+='</table><p style="font-size:11px;color:#888;text-align:center;margin-top:8px">Top 10 - Classement</p></div>';document.getElementById('standings').innerHTML=html;}catch(e){showFallback(league);}}
-// VIDEO QUI JOUE VRAIMENT POT0 - NOUVEAU LECTEUR DAILYMOTION + FOOT + SERIES FR POUR LA MI-TEMPS
-function playVideo(el,id,url){
-el.innerHTML='<iframe src="https://geo.dailymotion.com/player.html?video='+id+'&autoplay=1" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; web-share"></iframe>';
+// VIDEO QUI JOUE - SANS BOUTON, SANS AUTOPLAY, 2 CLICS POT0
+function playVideo(el,id){
+el.innerHTML='<iframe src="https://geo.dailymotion.com/player.html?video='+id+'" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>';
 }
 async function loadVideos(force){
 let container=document.getElementById('videosList');
 if(allVideos.length && !force){renderVideos(allVideos);return;}
 container.innerHTML='<p style="text-align:center;color:#888;padding:20px">🔄 Recherche des vidéos du jour...</p>';
 let fetched=[];
-// On prend 2 sortes : foot + séries/films en FR pour la mi-temps
 let searches=[
 {q:'résumé match football buts', tag:'⚽ FOOT • RÉSUMÉ'},
-{q:'film complet en français', tag:'🎬 FILM EN FR'},
+{q:'ligue 1 résumé buts', tag:'⚽ LIGUE 1 • BUTS'},
 {q:'série en français complet', tag:'📺 SÉRIE EN FR • MI-TEMPS'}
 ];
 for(let s of searches){
@@ -179,10 +177,9 @@ let data=await res.json();
 if(data && data.list){
 data.list.forEach(v=>{
 if(!v.id || !v.title) return;
-// On enlève juste les trucs bizarres, pas les séries, pas les films poto !
 let t=v.title.toLowerCase();
 if(t.includes('pharmacy') || t.includes('convenience store') || t.includes('balita') || t.includes('gma')) return;
-fetched.push({tag:s.tag, title:v.title, desc:(v.description||'Vidéo en français').slice(0,120), id:v.id, thumb:v.thumbnail_720_url||'', url:v.url||('https://www.dailymotion.com/video/'+v.id), date:new Date(v.created_time*1000).toLocaleDateString('fr-FR'), time:v.created_time});
+fetched.push({tag:s.tag, title:v.title, desc:(v.description||'Vidéo en français').slice(0,120), id:v.id, thumb:v.thumbnail_720_url||'', date:new Date(v.created_time*1000).toLocaleDateString('fr-FR'), time:v.created_time});
 });
 }
 }catch(e){}
@@ -191,14 +188,13 @@ if(fetched.length===0){
 container.innerHTML=`<div class="card" style="text-align:center;padding:25px"><h3>🎬 Pas de vidéo pour le moment</h3><p style="margin-top:10px;color:#aaa">Clique sur Actualiser.<br><br><b style="color:#22c55e">RASTIZY 👍</b></p></div>`;
 allVideos=[];return;
 }
-// On mélange : un peu de foot, un peu de série, comme tu as dit poto !
 fetched.sort((a,b)=>b.time-a.time);
 let seen=new Set(); let clean=[];
 for(let v of fetched){if(seen.has(v.title)) continue; seen.add(v.title); clean.push(v);}
 allVideos=clean.slice(0,12);
 renderVideos(allVideos);
 }
-function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>`<div class="video"><div class="h-wrap" onclick="playVideo(this,'${v.id}','${v.url}')"><img src="${v.thumb}" onerror="this.src='https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'"><div class="play-overlay">▶️</div></div><div class="info"><span class="tag">${v.tag}</span><span class="tag-long">🇫🇷 EN FRANÇAIS</span><h3>▶️ ${v.title}</h3><p>${v.desc}</p><p style="color:#888">📅 ${v.date||''} • Clique sur la photo pour jouer</p><a class="open-btn" href="${v.url}" target="_blank">▶️ Si ça ne joue pas, clique ici pour ouvrir</a></div></div>`).join('');}
+function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>`<div class="video"><div class="h-wrap" onclick="playVideo(this,'${v.id}')"><img src="${v.thumb}" onerror="this.src='https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'"><div class="play-overlay">▶️</div></div><div class="info"><span class="tag">${v.tag}</span><span class="tag-long">🇫🇷 EN FRANÇAIS</span><h3>▶️ ${v.title}</h3><p>${v.desc}</p><p style="color:#888">📅 ${v.date||''} • Clique 2 fois : sur la photo, puis sur Play dans le lecteur</p></div></div>`).join('');}
 function filterVideos(){let q=document.getElementById('videoSearch').value.toLowerCase();renderVideos(allVideos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)||v.tag.toLowerCase().includes(q)));}
 async function loadNews(force){let container=document.getElementById('newsList');if(allNews.length && !force){renderNews(allNews);return;}container.innerHTML='<p style="text-align:center;color:#888;padding:20px">🔄 Recherche des matchs qui viennent de se terminer...</p>';loadNewsFromScores();}
 function loadNewsFromScores(){if(allEvents.length===0){document.getElementById('newsList').innerHTML='<p style="text-align:center;color:#888">Chargement des résultats...</p>';loadScores();return;}let finished=allEvents.filter(ev=>ev.competitions[0].status.type.state==='post');finished.sort((a,b)=>new Date(b.date)-new Date(a.date));let list=finished.slice(0,20).map(ev=>{let comp=ev.competitions[0];let home=comp.competitors.find(c=>c.homeAway==='home');let away=comp.competitors.find(c=>c.homeAway==='away');let winner = parseInt(home.score)>parseInt(away.score)?home.team.displayName : parseInt(away.score)>parseInt(home.score)?away.team.displayName : 'Match nul';let text = winner==='Match nul' ? `Match nul. Les deux équipes se partagent les points. Score final ${home.score} - ${away.score}.` : `${winner} gagne ce match ! Score final ${home.score} - ${away.score}. ${winner} prend les 3 points.`;return {league:ev.leagues?ev.leagues[0].name:'Football', home:home.team.displayName, away:away.team.displayName, hs:home.score, as:away.score, winner:winner, text:text, date:ev.date, time:new Date(ev.date).getTime()};});allNews=list;renderNews(allNews);}
