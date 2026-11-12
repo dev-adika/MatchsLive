@@ -32,12 +32,11 @@ button.send{width:100%;padding:13px;background:#16a34a;color:#fff;border:none;bo
 .fav-btn{background:none;border:none;font-size:20px;cursor:pointer;margin-left:5px}
 .fav-btn.active{filter:none} .fav-btn:not(.active){filter:grayscale(1);opacity:.4}
 table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;text-align:left;border-bottom:1px solid #333} th{color:#22c55e} td:nth-child(1),td:nth-child(3),td:nth-child(4){text-align:center}
-.video{background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:14px}
-.video video{width:100%;height:auto;display:block;background:#000}
-.video .play-big{width:100%;padding:13px;background:#ef4444;color:#fff;border:none;font-weight:bold;font-size:16px;cursor:pointer}
-.video div.info{padding:12px} .video h3{font-size:15px;color:#fff} .video p{font-size:12px;color:#aaa;margin-top:4px}
-.video .tag{display:inline-block;background:#16a34a;color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold}
-.video .tag-long{display:inline-block;background:#f59e0b;color:#000;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold;margin-left:5px}
+.photo{background:#1e1e1e;border-radius:14px;overflow:hidden;margin-bottom:14px;border:1px solid #333}
+.photo img{width:100%;height:220px;object-fit:cover;display:block}
+.photo div.info{padding:12px} .photo h3{font-size:15px;color:#fff} .photo p{font-size:12px;color:#aaa;margin-top:4px}
+.photo .tag{display:inline-block;background:#16a34a;color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold}
+.photo .tag-long{display:inline-block;background:#f59e0b;color:#000;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold;margin-left:5px}
 .news{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px;overflow:hidden;border-left:4px solid #22c55e}
 .news h3{font-size:15px;line-height:1.3} .news p{font-size:13px;color:#ccc;margin-top:6px;line-height:1.4}
 .news small{color:#22c55e;font-size:11px;font-weight:bold}
@@ -58,12 +57,12 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 </head>
 <body>
 <div id="goalNotif" class="notif" onclick="this.style.display='none'"></div>
-<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement Top 10 • Matchs Terminés • Vidéos qui jouent</p></header>
+<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement Top 10 • Matchs Terminés • Belles Photos Foot</p></header>
 <div class="bell-bar"><span id="bellText">🔔 Active la cloche pour tes favoris</span><button id="bellBtn" class="bell-btn" onclick="toggleBell()">🔔 Activer</button></div>
 <div class="tabs">
 <button class="active" onclick="showTab('scores',this)">📊 Scores</button>
 <button onclick="showTab('classement',this)">🏆 Classement</button>
-<button onclick="showTab('videos',this)">🎥 Vidéos qui jouent</button>
+<button onclick="showTab('photos',this)">📸 Photos Foot</button>
 <button onclick="showTab('news',this)">📰 Terminés Récents</button>
 <button onclick="showTab('comments',this)">💬 Commentaires <span class="dot" id="commentDot">1</span></button>
 </div>
@@ -91,12 +90,12 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 <div id="standings"></div>
 </div>
 
-<div id="videos" class="section">
-<div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une vidéo..." oninput="filterVideos()"></div>
-<p style="font-size:12px;color:#888;text-align:center;margin-bottom:6px">🎬 Que les vidéos qui jouent chez toi ! • Appuie sur le bouton rouge ▶️</p>
-<p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:6px">🔄 Ça change toutes les 10h !</p>
-<p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:10px">📅 Vidéos du moment : <b id="videoDateText"></b> • Prochain changement dans <b id="nextChangeText"></b></p>
-<div id="videosList"></div>
+<div id="photos" class="section">
+<div class="search-box"><span class="search-icon">🔍</span><input id="photoSearch" placeholder="Recherche une photo : Stade, Ballon, Togo..." oninput="filterPhotos()"></div>
+<p style="font-size:12px;color:#888;text-align:center;margin-bottom:6px">📸 Plus de vidéos, que des belles photos ! • Ça charge tout de suite, jamais 0:00 !</p>
+<p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:6px">🔄 Ça change toutes les 5 min !</p>
+<p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:10px">📅 Photos du moment : <b id="photoDateText"></b> • Prochain changement dans <b id="nextChangeText"></b></p>
+<div id="photosList"></div>
 </div>
 
 <div id="news" class="section">
@@ -133,12 +132,12 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 const FIREBASE_URL="https://matchslive-5e96f-default-rtdb.firebaseio.com/comments.json";
 let allEvents=[]; let currentFilter='all';
 let favs = JSON.parse(localStorage.getItem('ml_favs')||'[]');
-let allNews=[]; let allVideos=[];
+let allNews=[]; let allPhotos=[];
 let bellOn = localStorage.getItem('ml_bell')==='1';
 let lastScores = {};
 let lastCommentCount = 0; let lastCommentTime = 0; let commentsUncovered = false;
-document.getElementById('videoDateText').innerText = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-function showTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='classement')loadStandings();if(id==='news')loadNews();if(id==='videos')loadVideos();if(id==='comments'){document.getElementById('commentDot').style.display='none';}}
+document.getElementById('photoDateText').innerText = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+function showTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');if(id==='classement')loadStandings();if(id==='news')loadNews();if(id==='photos')loadPhotos();if(id==='comments'){document.getElementById('commentDot').style.display='none';}}
 function uncoverComments(){document.getElementById('commentsCover').style.display='none';document.getElementById('commentsContent').style.display='block';commentsUncovered=true;document.getElementById('commentDot').style.display='none';loadComments();}
 function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.subtabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderMatches();}
 function toggleFav(team,btn){if(favs.includes(team)){favs=favs.filter(t=>t!==team);}else{favs.push(team);alert(team+' ajouté à tes favoris ❤️');}localStorage.setItem('ml_favs',JSON.stringify(favs));renderMatches(); updateBellText();}
@@ -152,39 +151,38 @@ function renderMatches(){let query=(document.getElementById('searchInput').value
 const FALLBACK_STANDINGS={"eng.1":[{n:"Arsenal",j:12,p:28,d:15},{n:"Man City",j:12,p:25,d:14},{n:"Chelsea",j:12,p:22,d:8},{n:"Liverpool",j:12,p:21,d:7},{n:"Man United",j:12,p:20,d:5},{n:"Tottenham",j:12,p:18,d:3},{n:"Newcastle",j:12,p:17,d:4},{n:"Aston Villa",j:12,p:16,d:2},{n:"Brighton",j:12,p:15,d:0},{n:"West Ham",j:12,p:13,d:-3}],"esp.1":[{n:"Real Madrid",j:12,p:29,d:18},{n:"Barcelone",j:12,p:27,d:16},{n:"Atletico Madrid",j:12,p:24,d:10},{n:"Seville",j:12,p:21,d:6},{n:"Real Sociedad",j:12,p:19,d:4},{n:"Villarreal",j:12,p:18,d:3},{n:"Athletic Bilbao",j:12,p:17,d:2},{n:"Betis",j:12,p:15,d:0},{n:"Valence",j:12,p:13,d:-2},{n:"Getafe",j:12,p:11,d:-5}],"fra.1":[{n:"PSG",j:12,p:30,d:20},{n:"Lens",j:12,p:25,d:9},{n:"Marseille",j:12,p:24,d:11},{n:"Monaco",j:12,p:23,d:8},{n:"Lille",j:12,p:21,d:6},{n:"Lyon",j:12,p:19,d:4},{n:"Rennes",j:12,p:17,d:2},{n:"Nice",j:12,p:16,d:1},{n:"Toulouse",j:12,p:13,d:-2},{n:"Nantes",j:12,p:11,d:-4}],"ita.1":[{n:"Napoli",j:12,p:27,d:14},{n:"Inter",j:12,p:26,d:15},{n:"AC Milan",j:12,p:24,d:10},{n:"Juventus",j:12,p:22,d:8},{n:"Roma",j:12,p:20,d:5},{n:"Atalanta",j:12,p:19,d:6},{n:"Lazio",j:12,p:17,d:2},{n:"Fiorentina",j:12,p:15,d:0},{n:"Bologne",j:12,p:14,d:-1},{n:"Torino",j:12,p:12,d:-3}],"ger.1":[{n:"Bayern Munich",j:11,p:30,d:28},{n:"RB Leipzig",j:11,p:24,d:12},{n:"Dortmund",j:11,p:23,d:10},{n:"Leverkusen",j:11,p:21,d:8},{n:"Stuttgart",j:11,p:19,d:5},{n:"Francfort",j:11,p:17,d:3},{n:"Wolfsburg",j:11,p:15,d:1},{n:"Fribourg",j:11,p:14,d:0},{n:"Gladbach",j:11,p:12,d:-2},{n:"Hoffenheim",j:11,p:11,d:-4}]};
 function showFallback(league){let rows=FALLBACK_STANDINGS[league]||FALLBACK_STANDINGS["eng.1"];let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';rows.forEach((e,i)=>{html+=`<tr><td>${i+1}</td><td><b>${e.n}</b></td><td>${e.j}</td><td><b style="color:#22c55e">${e.p}</b></td><td>${e.d}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}
 async function loadStandings(){let league=document.getElementById('leagueSelect').value;document.getElementById('standings').innerHTML='<p style="text-align:center;color:#888;padding:20px">Chargement...</p>';try{let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/standings`);if(!res.ok) throw new Error('no');let data=await res.json();let entries=data.children[0].standings.entries;let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';entries.slice(0,10).forEach((e,i)=>{let gp=e.stats.find(s=>s.name==='gamesPlayed');let pts=e.stats.find(s=>s.name==='points');let diff=e.stats.find(s=>s.name==='pointDifferential');html+=`<tr><td>${i+1}</td><td><b>${e.team.displayName}</b></td><td>${gp?gp.value:'-'}</td><td><b style="color:#22c55e">${pts?pts.value:'-'}</b></td><td>${diff?diff.value:'-'}</td></tr>`;});html+='</table><p style="font-size:11px;color:#888;text-align:center;margin-top:8px">Top 10 - Classement</p></div>';document.getElementById('standings').innerHTML=html;}catch(e){showFallback(league);}}
-// FINALE POT0 - SEULEMENT LES 2 QUI JOUENT, CA CHANGE TOUTES LES 10H
-const VIDEO_OK_1='https://www.w3schools.com/html/mov_bbb.mp4';
-const VIDEO_OK_2='https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4';
-const VIDEOS_BASE=[
-{tag:'🎬 VIDÉO QUI JOUE', title:'Vidéo du moment 1 : Le lapin - Ça joue !', desc:'Celle qui joue chez toi, poto.', poster:'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg', mp4:VIDEO_OK_1},
-{tag:'🎬 VIDÉO QUI JOUE', title:'Vidéo du moment 2 : Pour le plaisir - Ça joue !', desc:'La 2ème qui joue chez toi, poto.', poster:'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg', mp4:VIDEO_OK_2},
-{tag:'🎬 VIDÉO QUI JOUE', title:'Vidéo du moment 3 : Foot et détente - Ça joue !', desc:'Même vidéo qui joue, autre titre.', poster:'https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg', mp4:VIDEO_OK_1},
-{tag:'🎬 VIDÉO QUI JOUE', title:'Vidéo du moment 4 : Mi-temps - Ça joue !', desc:'Même vidéo qui joue, autre titre.', poster:'https://images.pexels.com/photos/1884574/pexels-photo-1884574.jpeg', mp4:VIDEO_OK_2},
-{tag:'🎬 VIDÉO QUI JOUE', title:'Vidéo du moment 5 : Après le match - Ça joue !', desc:'Même vidéo qui joue, autre titre.', poster:'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg', mp4:VIDEO_OK_1},
-{tag:'🎬 VIDÉO QUI JOUE', title:'Vidéo du moment 6 : Détente - Ça joue !', desc:'Même vidéo qui joue, autre titre.', poster:'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg', mp4:VIDEO_OK_2}
+// PHOTOS POT0 - CA CHANGE TOUTES LES 5 MIN 😘
+const PHOTOS_BASE=[
+{tag:'📸 PHOTO FOOT', title:'Le stade est prêt pour le grand match !', desc:'Belle photo de stade, l’ambiance est là.', img:'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'Le ballon au centre, tout commence !', desc:'Le ballon est là, le match va commencer.', img:'https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'Entraînement des gars, on ne lâche rien !', desc:'Les gars s’entraînent dur pour gagner.', img:'https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'La nuit au stade, c’est magique !', desc:'Les lumières, la pelouse, la magie du foot.', img:'https://images.pexels.com/photos/1884574/pexels-photo-1884574.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'Les supporters sont chauds !', desc:'Aného, Lomé, tout le Togo est derrière !', img:'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'But ! Tout le monde est debout !', desc:'Quand ton équipe marque, c’est la folie !', img:'https://images.pexels.com/photos/3621104/pexels-photo-3621104.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'Le gardien est prêt !', desc:'Il ne va rien laisser passer aujourd’hui.', img:'https://images.pexels.com/photos/399187/pexels-photo-399187.jpeg'},
+{tag:'📸 PHOTO FOOT', title:'Mi-temps, on souffle un peu', desc:'On se repose, on prépare la 2ème mi-temps.', img:'https://images.pexels.com/photos/1089438/pexels-photo-1089438.jpeg'}
 ];
-function playThis(btn,idx){let v=document.getElementById('vid-'+idx);v.play().then(()=>{btn.innerText='▶️ Ça joue !';}).catch(e=>{btn.innerText='▶️ Appuie encore';});}
 function updateNextChange(){
 let now=Date.now();
-let period=1000*60*60*10; // 10H POT0
+let period=1000*60*5; // 5 MIN POT0 😘
 let next=Math.ceil(now/period)*period;
 let diff=next-now;
-let h=Math.floor(diff/(1000*60*60));
-let m=Math.floor((diff%(1000*60*60))/(1000*60));
+let m=Math.floor(diff/(1000*60));
+let s=Math.floor((diff%(1000*60))/1000);
 let el=document.getElementById('nextChangeText');
-if(el) el.innerText=h+'h '+m+'min';
+if(el) el.innerText=m+'min '+s+'s';
 }
-function loadVideos(force){
-let period=1000*60*60*10; // 10H POT0 - CA CHANGE TOUTES LES 10H
+function loadPhotos(){
+let period=1000*60*5; // 5 MIN POT0 😘
 let slot=Math.floor(Date.now()/period);
 let rotated=[];
-for(let i=0;i<VIDEOS_BASE.length;i++){ rotated.push(VIDEOS_BASE[(i+slot)%VIDEOS_BASE.length]); }
-allVideos=rotated;
-renderVideos(allVideos);
+for(let i=0;i<PHOTOS_BASE.length;i++){ rotated.push(PHOTOS_BASE[(i+slot)%PHOTOS_BASE.length]); }
+allPhotos=rotated;
+renderPhotos(allPhotos);
 updateNextChange();
 }
-function renderVideos(list){document.getElementById('videosList').innerHTML=list.map((v,idx)=>`<div class="video"><video id="vid-${idx}" controls preload="metadata" playsinline poster="${v.poster}" onclick="this.play()"><source src="${v.mp4}" type="video/mp4"></video><button class="play-big" onclick="playThis(this,${idx})">▶️ APPUIE ICI POUR JOUER</button><div class="info"><span class="tag">${v.tag}</span><span class="tag-long">🇫🇷 DANS MON APP</span><h3>▶️ ${v.title}</h3><p>${v.desc}</p><p style="color:#888">📅 ${new Date().toLocaleDateString('fr-FR')} • Ça change toutes les 10h !</p></div></div>`).join('');}
-function filterVideos(){let q=document.getElementById('videoSearch').value.toLowerCase();renderVideos(allVideos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)||v.tag.toLowerCase().includes(q)));}
+function renderPhotos(list){document.getElementById('photosList').innerHTML=list.map(v=>`<div class="photo"><img src="${v.img}" alt="${v.title}" loading="lazy"><div class="info"><span class="tag">${v.tag}</span><span class="tag-long">🇹🇬 DANS MON APP</span><h3>${v.title}</h3><p>${v.desc}</p><p style="color:#888">📅 ${new Date().toLocaleDateString('fr-FR')} • Ça change toutes les 5 min !</p></div></div>`).join('');}
+function filterPhotos(){let q=document.getElementById('photoSearch').value.toLowerCase();renderPhotos(allPhotos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)));}
 async function loadNews(force){let container=document.getElementById('newsList');if(allNews.length && !force){renderNews(allNews);return;}container.innerHTML='<p style="text-align:center;color:#888;padding:20px">🔄 Recherche des matchs qui viennent de se terminer...</p>';loadNewsFromScores();}
 function loadNewsFromScores(){if(allEvents.length===0){document.getElementById('newsList').innerHTML='<p style="text-align:center;color:#888">Chargement des résultats...</p>';loadScores();return;}let finished=allEvents.filter(ev=>ev.competitions[0].status.type.state==='post');finished.sort((a,b)=>new Date(b.date)-new Date(a.date));let list=finished.slice(0,20).map(ev=>{let comp=ev.competitions[0];let home=comp.competitors.find(c=>c.homeAway==='home');let away=comp.competitors.find(c=>c.homeAway==='away');let winner = parseInt(home.score)>parseInt(away.score)?home.team.displayName : parseInt(away.score)>parseInt(home.score)?away.team.displayName : 'Match nul';let text = winner==='Match nul' ? `Match nul. Les deux équipes se partagent les points. Score final ${home.score} - ${away.score}.` : `${winner} gagne ce match ! Score final ${home.score} - ${away.score}. ${winner} prend les 3 points.`;return {league:ev.leagues?ev.leagues[0].name:'Football', home:home.team.displayName, away:away.team.displayName, hs:home.score, as:away.score, winner:winner, text:text, date:ev.date, time:new Date(ev.date).getTime()};});allNews=list;renderNews(allNews);}
 function renderNews(list){if(list.length===0){document.getElementById('newsList').innerHTML='<div class="news"><h3>Aucun match terminé pour le moment</h3><p>Les matchs d\'aujourd\'hui ne sont pas encore terminés. Reviens après les matchs !</p></div>';return;}document.getElementById('newsList').innerHTML=list.map(n=>`<div class="news"><small>✅ TERMINÉ • ${n.league} • ${new Date(n.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</small><h3>${n.home} vs ${n.away}</h3><div class="result">${n.home} <span>${n.hs} - ${n.as}</span> ${n.away}</div><p>🏆 <b>${n.winner==='Match nul'?'Match nul':n.winner+' gagne !'}</b><br>${n.text}</p></div>`).join('');}
@@ -194,8 +192,8 @@ async function loadComments(){try{let res=await fetch(FIREBASE_URL);let data=awa
 async function checkNewComments(){try{let res=await fetch(FIREBASE_URL);let data=await res.json();if(!data) return;let arr=Object.entries(data).sort((a,b)=>b[1].time-a[1].time);let latest=arr[0][1];if(lastCommentCount===0){lastCommentCount=arr.length;lastCommentTime=latest.time;return;}if(arr.length>lastCommentCount){let myName=localStorage.getItem('ml_name')||'';if(latest.name!==myName){showCommentNotif(latest.name||'Quelqu\'un', latest.text||'');}lastCommentCount=arr.length;lastCommentTime=latest.time;if(commentsUncovered) loadComments();}}catch(e){}}
 async function sendComment(){let name=document.getElementById('userName').value.trim()||'Anonyme';let text=document.getElementById('commentText').value.trim();if(!text){alert('Écris quelque chose poto !');return;}localStorage.setItem('ml_name',name);await fetch(FIREBASE_URL,{method:'POST',body:JSON.stringify({name:name,text:text,time:Date.now()})});document.getElementById('commentText').value='';lastCommentCount++;loadComments();alert('Envoyé ! Tout le monde le reçoit en direct 🔥');}
 document.getElementById('userName').value=localStorage.getItem('ml_name')||'';
-updateBellText();loadScores();loadNews();loadVideos();checkNewComments();
-setInterval(loadScores,30000);setInterval(checkNewComments,5000);setInterval(loadNewsFromScores,60000);setInterval(updateNextChange,60000);
+updateBellText();loadScores();loadNews();loadPhotos();checkNewComments();
+setInterval(loadScores,30000);setInterval(checkNewComments,5000);setInterval(loadNewsFromScores,60000);setInterval(loadPhotos,30000);setInterval(updateNextChange,1000);
 </script>
 </body>
 </html>
