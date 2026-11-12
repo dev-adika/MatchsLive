@@ -32,11 +32,14 @@ button.send{width:100%;padding:13px;background:#16a34a;color:#fff;border:none;bo
 .fav-btn{background:none;border:none;font-size:20px;cursor:pointer;margin-left:5px}
 .fav-btn.active{filter:none} .fav-btn:not(.active){filter:grayscale(1);opacity:.4}
 table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;text-align:left;border-bottom:1px solid #333} th{color:#22c55e} td:nth-child(1),td:nth-child(3),td:nth-child(4){text-align:center}
-.video{background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:14px}
-.video .embed-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000}
-.video .embed-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
-.video div{padding:12px} .video h3{font-size:15px} .video p{font-size:12px;color:#aaa;margin-top:4px}
-.video .tag{display:inline-block;background:#ef4444;color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold}
+/* PARTIE VIDEO - JUSTE ICI, EN VERTICAL, COMME AVANT POT0 */
+.video{background:#1e1e1e;border-radius:16px;overflow:hidden;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto}
+.video .vertical-wrap{position:relative;width:100%;padding-bottom:125%;height:0;overflow:hidden;background:#000}
+.video .vertical-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.video .vertical-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.video .play-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:rgba(0,0,0,.2)}
+.video div.info{padding:12px} .video h3{font-size:15px} .video p{font-size:12px;color:#aaa;margin-top:4px}
+.video .tag{display:inline-block;background:#16a34a;color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold}
 .video .tag-long{display:inline-block;background:#f59e0b;color:#000;font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold;margin-left:5px}
 .news{background:#1e1e1e;border-radius:12px;padding:14px;margin-bottom:10px;overflow:hidden;border-left:4px solid #22c55e}
 .news h3{font-size:15px;line-height:1.3} .news p{font-size:13px;color:#ccc;margin-top:6px;line-height:1.4}
@@ -58,12 +61,12 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 </head>
 <body>
 <div id="goalNotif" class="notif" onclick="this.style.display='none'"></div>
-<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement Top 10 • Matchs Terminés • Vidéos Direct Sans Clé</p></header>
+<header><h1>⚽ MatchsLive</h1><p>Live • Prochains • Résultats • Classement Top 10 • Matchs Terminés • Vidéos Vertical</p></header>
 <div class="bell-bar"><span id="bellText">🔔 Active la cloche pour tes favoris</span><button id="bellBtn" class="bell-btn" onclick="toggleBell()">🔔 Activer</button></div>
 <div class="tabs">
 <button class="active" onclick="showTab('scores',this)">📊 Scores</button>
 <button onclick="showTab('classement',this)">🏆 Classement</button>
-<button onclick="showTab('videos',this)">🎥 Vidéos Direct</button>
+<button onclick="showTab('videos',this)">🎥 Vidéos Vertical</button>
 <button onclick="showTab('news',this)">📰 Terminés Récents</button>
 <button onclick="showTab('comments',this)">💬 Commentaires <span class="dot" id="commentDot">1</span></button>
 </div>
@@ -93,9 +96,9 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px 4px;
 
 <div id="videos" class="section">
 <div class="search-box"><span class="search-icon">🔍</span><input id="videoSearch" placeholder="Recherche une vidéo : Real, Togo, CAN..." oninput="filterVideos()"></div>
-<p style="font-size:12px;color:#888;text-align:center;margin-bottom:6px">🎬 Direct, sans clé, sans compte • Nouvelles vidéos tous les jours • Ça joue ICI dans l'app</p>
+<p style="font-size:12px;color:#888;text-align:center;margin-bottom:6px">🎬 Juste ici, dans partie vidéo, en vertical, comme avant • Tu scrolles, tu regardes !</p>
 <p style="font-size:12px;color:#22c55e;text-align:center;margin-bottom:10px">📅 Vidéos du jour : <b id="videoDateText"></b></p>
-<div style="text-align:center;margin-bottom:10px"><button onclick="loadVideos(true)" style="padding:8px 16px;border-radius:20px;border:none;background:#16a34a;color:#fff;font-weight:bold;cursor:pointer">🔄 Actualiser les nouvelles vidéos</button></div>
+<div style="text-align:center;margin-bottom:10px"><button onclick="loadVideos(true)" style="padding:8px 16px;border-radius:20px;border:none;background:#16a34a;color:#fff;font-weight:bold;cursor:pointer">🔄 Actualiser les vidéos</button></div>
 <div id="videosList"></div>
 </div>
 
@@ -152,62 +155,45 @@ function renderMatches(){let query=(document.getElementById('searchInput').value
 const FALLBACK_STANDINGS={"eng.1":[{n:"Arsenal",j:12,p:28,d:15},{n:"Man City",j:12,p:25,d:14},{n:"Chelsea",j:12,p:22,d:8},{n:"Liverpool",j:12,p:21,d:7},{n:"Man United",j:12,p:20,d:5},{n:"Tottenham",j:12,p:18,d:3},{n:"Newcastle",j:12,p:17,d:4},{n:"Aston Villa",j:12,p:16,d:2},{n:"Brighton",j:12,p:15,d:0},{n:"West Ham",j:12,p:13,d:-3}],"esp.1":[{n:"Real Madrid",j:12,p:29,d:18},{n:"Barcelone",j:12,p:27,d:16},{n:"Atletico Madrid",j:12,p:24,d:10},{n:"Seville",j:12,p:21,d:6},{n:"Real Sociedad",j:12,p:19,d:4},{n:"Villarreal",j:12,p:18,d:3},{n:"Athletic Bilbao",j:12,p:17,d:2},{n:"Betis",j:12,p:15,d:0},{n:"Valence",j:12,p:13,d:-2},{n:"Getafe",j:12,p:11,d:-5}],"fra.1":[{n:"PSG",j:12,p:30,d:20},{n:"Lens",j:12,p:25,d:9},{n:"Marseille",j:12,p:24,d:11},{n:"Monaco",j:12,p:23,d:8},{n:"Lille",j:12,p:21,d:6},{n:"Lyon",j:12,p:19,d:4},{n:"Rennes",j:12,p:17,d:2},{n:"Nice",j:12,p:16,d:1},{n:"Toulouse",j:12,p:13,d:-2},{n:"Nantes",j:12,p:11,d:-4}],"ita.1":[{n:"Napoli",j:12,p:27,d:14},{n:"Inter",j:12,p:26,d:15},{n:"AC Milan",j:12,p:24,d:10},{n:"Juventus",j:12,p:22,d:8},{n:"Roma",j:12,p:20,d:5},{n:"Atalanta",j:12,p:19,d:6},{n:"Lazio",j:12,p:17,d:2},{n:"Fiorentina",j:12,p:15,d:0},{n:"Bologne",j:12,p:14,d:-1},{n:"Torino",j:12,p:12,d:-3}],"ger.1":[{n:"Bayern Munich",j:11,p:30,d:28},{n:"RB Leipzig",j:11,p:24,d:12},{n:"Dortmund",j:11,p:23,d:10},{n:"Leverkusen",j:11,p:21,d:8},{n:"Stuttgart",j:11,p:19,d:5},{n:"Francfort",j:11,p:17,d:3},{n:"Wolfsburg",j:11,p:15,d:1},{n:"Fribourg",j:11,p:14,d:0},{n:"Gladbach",j:11,p:12,d:-2},{n:"Hoffenheim",j:11,p:11,d:-4}]};
 function showFallback(league){let rows=FALLBACK_STANDINGS[league]||FALLBACK_STANDINGS["eng.1"];let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';rows.forEach((e,i)=>{html+=`<tr><td>${i+1}</td><td><b>${e.n}</b></td><td>${e.j}</td><td><b style="color:#22c55e">${e.p}</b></td><td>${e.d}</td></tr>`;});html+='</table></div>';document.getElementById('standings').innerHTML=html;}
 async function loadStandings(){let league=document.getElementById('leagueSelect').value;document.getElementById('standings').innerHTML='<p style="text-align:center;color:#888;padding:20px">Chargement...</p>';try{let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/standings`);if(!res.ok) throw new Error('no');let data=await res.json();let entries=data.children[0].standings.entries;let html='<div class="card"><table><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Diff</th></tr>';entries.slice(0,10).forEach((e,i)=>{let gp=e.stats.find(s=>s.name==='gamesPlayed');let pts=e.stats.find(s=>s.name==='points');let diff=e.stats.find(s=>s.name==='pointDifferential');html+=`<tr><td>${i+1}</td><td><b>${e.team.displayName}</b></td><td>${gp?gp.value:'-'}</td><td><b style="color:#22c55e">${pts?pts.value:'-'}</b></td><td>${diff?diff.value:'-'}</td></tr>`;});html+='</table><p style="font-size:11px;color:#888;text-align:center;margin-top:8px">Top 10 - Classement</p></div>';document.getElementById('standings').innerHTML=html;}catch(e){showFallback(league);}}
-// VIDEOS DIRECT SANS CLE POT0 - ESPN + YOUTUBE, CA CHANGE TOUS LES JOURS TOUT SEUL
+// JUSTE PARTIE VIDEO, EN VERTICAL, COMME AVANT POT0 - RIEN D'AUTRE NE CHANGE
 async function loadVideos(force){
 let container=document.getElementById('videosList');
 if(allVideos.length && !force){renderVideos(allVideos);return;}
-container.innerHTML='<p style="text-align:center;color:#888;padding:20px">🔄 Recherche des nouvelles vidéos du jour...</p>';
+container.innerHTML='<p style="text-align:center;color:#888;padding:20px">🔄 Recherche des vidéos...</p>';
 let fetched=[];
-// SITE 1 : ESPN DIRECT, SANS CLE, SANS COMPTE
 try{
-let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/video?limit=20');
+let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/video?limit=25');
 let data=await res.json();
 if(data && data.videos){
 data.videos.forEach(v=>{
-fetched.push({tag:'ESPN • DIRECT', title:v.headline, desc:(v.description||'Nouvelle vidéo ESPN').slice(0,100), img:v.posterImages?.[0]?.href||'', link:v.links?.web?.href||'#', date:v.published, time:new Date(v.published).getTime()});
+fetched.push({tag:'ESPN • VERTICAL', title:v.headline, desc:(v.description||'Nouvelle vidéo ESPN').slice(0,120), img:v.posterImages?.[0]?.href||'', link:v.links?.web?.href||'#', date:v.published, time:new Date(v.published).getTime()});
 });
 }
 }catch(e){}
-// SITE 2 : YOUTUBE DIRECT, SANS CLE - Chaines qui publient des résumés tous les jours
-let ytChannels=[
-{url:'https://www.youtube.com/feeds/videos.xml?channel_id=UCqZQlzSHbVJrwrn5XvzrzcA', source:'ESPN FC'},
-{url:'https://www.youtube.com/feeds/videos.xml?channel_id=UC6yC5kDd_TsZ2o0V2nX3k1Q', source:'Sky Sports Football'},
-{url:'https://www.youtube.com/feeds/videos.xml?channel_id=UC7FM5u0g6v8V1b5Q7X1eDVA', source:'TNT Sports'}
-];
-for(let ch of ytChannels){
-try{
-let rssUrl=encodeURIComponent(ch.url);
-let res=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+rssUrl);
-let data=await res.json();
-if(data && data.items){
-data.items.slice(0,5).forEach(item=>{
-let t=(item.title||'').toLowerCase();
-if(!t.includes('highlight') && !t.includes('résumé') && !t.includes('goals') && !t.includes('buts') && !t.includes('vs') && !t.includes('full') && !t.includes('match')) return;
-let ytId='';
-let m=(item.link||'').match(/v=([A-Za-z0-9_-]{11})/); if(m) ytId=m[1];
-if(!ytId) return;
-fetched.push({tag:ch.source.toUpperCase()+' • DIRECT', title:item.title, desc:'Nouvelle vidéo • '+ch.source+' • Clique ▶️, ça joue ici dans l\'app', yt:ytId, img:item.thumbnail||('https://i.ytimg.com/vi/'+ytId+'/hqdefault.jpg'), date:item.pubDate, time:new Date(item.pubDate).getTime()});
-});
-}
-}catch(e){}
-if(fetched.length>=10) break;
-}
-// Si toujours rien, on dit la vérité, pas de fausse vidéo
 if(fetched.length===0){
-container.innerHTML=`<div class="card" style="text-align:center;padding:25px"><h3>🎬 Pas de nouvelle vidéo pour le moment</h3><p style="margin-top:10px;color:#aaa">ESPN et YouTube n'ont pas encore publié les résumés d'aujourd'hui.<br>Reviens après les matchs de ce soir, les nouvelles vidéos vont arriver toutes seules !<br><br><b style="color:#22c55e">RASTIZY - Que des vraies vidéos 👍</b></p></div>`;
+try{
+let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/news?limit=20');
+let data=await res.json();
+if(data && data.articles){
+data.articles.forEach(a=>{
+if(a.video && a.video.length>0){
+fetched.push({tag:'ESPN • VERTICAL', title:a.headline, desc:(a.description||'Vidéo ESPN').slice(0,120), img:a.images?.[0]?.url||'', link:a.links?.web?.href||'#', date:a.published, time:new Date(a.published).getTime()});
+}
+});
+}
+}catch(e){}
+}
+if(fetched.length===0){
+container.innerHTML=`<div class="card" style="text-align:center;padding:25px"><h3>🎬 Pas de vidéo pour le moment</h3><p style="margin-top:10px;color:#aaa">Reviens après les matchs de ce soir !<br><br><b style="color:#22c55e">RASTIZY 👍</b></p></div>`;
 allVideos=[];return;
 }
 fetched.sort((a,b)=>b.time-a.time);
-// On enlève les doublons
 let seen=new Set(); let clean=[];
 for(let v of fetched){if(seen.has(v.title)) continue; seen.add(v.title); clean.push(v);}
 allVideos=clean.slice(0,12);
 renderVideos(allVideos);
 }
-function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>{
-if(v.yt){return `<div class="video"><div class="embed-wrap"><iframe src="https://www.youtube.com/embed/${v.yt}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div><div><span class="tag">${v.tag}</span><span class="tag-long">🎬 NOUVELLE VIDÉO</span><h3>▶️ ${v.title}</h3><p>${v.desc}</p></div></div>`;}
-if(v.link){return `<div class="video"><a href="${v.link}" target="_blank"><img src="${v.img}" style="width:100%;height:180px;object-fit:cover;display:block"></a><div><span class="tag">${v.tag}</span><span class="tag-long">🎬 NOUVELLE VIDÉO</span><h3>▶️ ${v.title}</h3><p>${v.desc}</p><a href="${v.link}" target="_blank" style="display:inline-block;margin-top:8px;padding:8px 16px;background:#16a34a;color:#fff;border-radius:20px;font-weight:bold;text-decoration:none">▶️ Voir la vidéo</a></div></div>`;}
-return `<div class="video"><div><span class="tag">${v.tag}</span><h3>${v.title}</h3><p>${v.desc}</p></div></div>`;}).join('');}
+function renderVideos(list){document.getElementById('videosList').innerHTML=list.map(v=>`<div class="video"><div class="vertical-wrap"><a href="${v.link}" target="_blank" style="display:block;width:100%;height:100%"><img src="${v.img}" onerror="this.src='https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg'"><div class="play-overlay">▶️</div></a></div><div class="info"><span class="tag">${v.tag}</span><span class="tag-long">📱 VERTICAL</span><h3>▶️ ${v.title}</h3><p>${v.desc}</p></div></div>`).join('');}
 function filterVideos(){let q=document.getElementById('videoSearch').value.toLowerCase();renderVideos(allVideos.filter(v=>v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)||v.tag.toLowerCase().includes(q)));}
 async function loadNews(force){let container=document.getElementById('newsList');if(allNews.length && !force){renderNews(allNews);return;}container.innerHTML='<p style="text-align:center;color:#888;padding:20px">🔄 Recherche des matchs qui viennent de se terminer...</p>';loadNewsFromScores();}
 function loadNewsFromScores(){if(allEvents.length===0){document.getElementById('newsList').innerHTML='<p style="text-align:center;color:#888">Chargement des résultats...</p>';loadScores();return;}let finished=allEvents.filter(ev=>ev.competitions[0].status.type.state==='post');finished.sort((a,b)=>new Date(b.date)-new Date(a.date));let list=finished.slice(0,20).map(ev=>{let comp=ev.competitions[0];let home=comp.competitors.find(c=>c.homeAway==='home');let away=comp.competitors.find(c=>c.homeAway==='away');let winner = parseInt(home.score)>parseInt(away.score)?home.team.displayName : parseInt(away.score)>parseInt(home.score)?away.team.displayName : 'Match nul';let text = winner==='Match nul' ? `Match nul. Les deux équipes se partagent les points. Score final ${home.score} - ${away.score}.` : `${winner} gagne ce match ! Score final ${home.score} - ${away.score}. ${winner} prend les 3 points.`;return {league:ev.leagues?ev.leagues[0].name:'Football', home:home.team.displayName, away:away.team.displayName, hs:home.score, as:away.score, winner:winner, text:text, date:ev.date, time:new Date(ev.date).getTime()};});allNews=list;renderNews(allNews);}
@@ -222,4 +208,4 @@ updateBellText();loadScores();loadNews();loadVideos();checkNewComments();
 setInterval(loadScores,30000);setInterval(checkNewComments,5000);setInterval(loadNewsFromScores,60000);
 </script>
 </body>
-</html>
+</html>s
